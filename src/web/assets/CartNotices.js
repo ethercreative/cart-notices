@@ -43,7 +43,7 @@ Craft.CartNotices = Craft.BaseElementIndex.extend({
 		if (isIndex && typeof history !== "undefined") {
 			let uri = "cart-notices";
 
-			if (selectedSourceHandle)
+			if (selectedSourceHandle && selectedSourceHandle !== '*')
 				uri += "/" + selectedSourceHandle;
 
 			history.replaceState({}, "", Craft.getUrl(uri));
