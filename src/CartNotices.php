@@ -84,6 +84,10 @@ class CartNotices extends Plugin
 		return \Craft::$app->controller->redirect($url);
 	}
 
+	/**
+	 * @return bool
+	 * @throws \yii\base\Exception
+	 */
 	public function beforeSaveSettings (): bool
 	{
 		$fieldLayout       = \Craft::$app->getFields()->assembleLayoutFromPost();
@@ -96,6 +100,10 @@ class CartNotices extends Plugin
 	// Events
 	// =========================================================================
 
+	/**
+	 * @return bool
+	 * @throws \Exception
+	 */
 	protected function beforeInstall (): bool
 	{
 		if (!\Craft::$app->getPlugins()->isPluginInstalled('commerce'))

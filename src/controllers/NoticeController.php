@@ -8,7 +8,6 @@
 
 namespace ether\cartnotices\controllers;
 
-use craft\base\Element;
 use craft\errors\InvalidElementException;
 use craft\helpers\UrlHelper;
 use craft\web\Controller;
@@ -142,6 +141,19 @@ class NoticeController extends Controller
 		);
 	}
 
+	/**
+	 * FIXME: Can't save after creation (multi-site content issue)
+	 *
+	 * @return \yii\web\Response|null
+	 * @throws NotFoundHttpException
+	 * @throws ServerErrorHttpException
+	 * @throws \Throwable
+	 * @throws \craft\errors\ElementNotFoundException
+	 * @throws \craft\errors\MissingComponentException
+	 * @throws \craft\errors\SiteNotFoundException
+	 * @throws \yii\base\Exception
+	 * @throws \yii\web\BadRequestHttpException
+	 */
 	public function actionSave ()
 	{
 		$this->requirePostRequest();
