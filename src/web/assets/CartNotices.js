@@ -37,7 +37,7 @@ Craft.CartNotices = Craft.BaseElementIndex.extend({
 		if (!this.$source)
 			return;
 
-		const selectedSourceHandle = this.$source.data("handle")
+		const selectedSourceHandle = this.$source.data("key")
 			, isIndex              = this.settings.context === "index";
 
 		if (isIndex && typeof history !== "undefined") {

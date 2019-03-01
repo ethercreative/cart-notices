@@ -79,7 +79,7 @@
 							class="formsubmit error"
 							data-action="cart-notices/notice/delete"
 							data-confirm="{{ 'Are you sure you want to delete this notice?'|t('cart-notices') }}"
-							data-redirect="{{ 'notices#'|hash }}"
+							data-redirect="{{ 'cart-notices#'|hash }}"
 						>
 							{{ 'Delete'|t('app') }}
 						</a>
@@ -231,16 +231,16 @@
 				{{ forms.checkboxSelect({
 					name: 'days',
 					id: 'days',
-					value: notice.days,
+					values: notice.days,
 					showAllOption: true,
 					options: {
-						1: 'Monday'|t('app'),
-						2: 'Tuesday'|t('app'),
-						3: 'Wednesday'|t('app'),
-						4: 'Thursday'|t('app'),
-						5: 'Friday'|t('app'),
-						6: 'Saturday'|t('app'),
-						0: 'Sunday'|t('app'),
+						'1': 'Monday'|t('cart-notices'),
+						'2': 'Tuesday'|t('cart-notices'),
+						'3': 'Wednesday'|t('cart-notices'),
+						'4': 'Thursday'|t('cart-notices'),
+						'5': 'Friday'|t('cart-notices'),
+						'6': 'Saturday'|t('cart-notices'),
+						'7': 'Sunday'|t('cart-notices'),
 					}
 				}) }}
 			{% endset %}

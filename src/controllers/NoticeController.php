@@ -92,9 +92,9 @@ class NoticeController extends Controller
 			if ($noticeId)
 			{
 				$variables['notice'] = Notice::find()
-				                             ->id($noticeId)
-				                             ->siteId($variables['site']->id)
-				                             ->one();
+					->id($noticeId)
+					->siteId($variables['site']->id)
+					->one();
 
 				if (!$variables['notice'])
 					throw new NotFoundHttpException('Notice not found');
@@ -124,7 +124,7 @@ class NoticeController extends Controller
 		}
 
 		// Urls
-		$variables['nextNoticeUrl'] = UrlHelper::url('tags/new');
+		$variables['nextNoticeUrl'] = UrlHelper::url('cart-notices/new');
 		$variables['continueEditingUrl'] = 'cart-notices/{id}';
 
 		if (\Craft::$app->isMultiSite)
@@ -213,14 +213,19 @@ class NoticeController extends Controller
 			$request->getParam('fieldsLocation', 'fields')
 		);
 
-		$notice->type      = $request->getParam('type');
-		$notice->target    = $request->getParam('target');
-		$notice->threshold = $request->getParam('threshold');
-		$notice->hour      = $request->getParam('hour');
-		$notice->days      = $request->getParam('days');
-		$notice->referer   = $request->getParam('referer');
-		$notice->minQty    = $request->getParam('minQty');
-		$notice->maxQty    = $request->getParam('maxQty');
+		$notice->type        = $request->getParam('type');
+		$notice->target      = $request->getParam('target');
+		$notice->threshold   = $request->getParam('threshold');
+		$notice->hour        = $request->getParam('hour');
+		$notice->days        = $request->getParam('days');
+		$notice->referer     = $request->getParam('referer');
+		$notice->minQty      = $request->getParam('minQty');
+		$notice->maxQty      = $request->getParam('maxQty');
+		$notice->productIds  = $request->getParam('products', []);
+		$notice->categoryIds = $request->getParam('categories', []);
+
+		if (!is_array($notice->productIds)) $notice->productIds = [];
+		if (!is_array($notice->categoryIds)) $notice->categoryIds = [];
 
 		// Save
 		if (!\Craft::$app->elements->saveElement($notice))
@@ -254,6 +259,55 @@ class NoticeController extends Controller
 		);
 
 		return $this->redirectToPostedUrl(compact('notice'));
+	}
+
+	/**
+	 * @return \yii\web\Response|null
+	 * @throws NotFoundHttpException
+	 * @throws \Throwable
+	 * @throws \yii\web\BadRequestHttpException
+	 */
+	public function actionDelete ()
+	{
+		$this->requirePostRequest();
+		$request = \Craft::$app->request;
+
+		$noticeId = $request->getBodyParam('noticeId');
+		$siteId   = $request->getBodyParam('siteId');
+
+		$notice = Notice::find()
+			->id($noticeId)
+			->siteId($siteId)
+			->one();
+
+		if (!$notice)
+			throw new NotFoundHttpException('Notice not found');
+
+		if (!\Craft::$app->elements->deleteElement($notice))
+		{
+			if ($request->getAcceptsJson())
+				return $this->asJson(['success' => false]);
+
+			\Craft::$app->session->setError(
+				CartNotices::t('Couldn\'t delete notice.')
+			);
+
+			// Send the entry back to the template
+			\Craft::$app->getUrlManager()->setRouteParams([
+				'notice' => $notice
+			]);
+
+			return null;
+		}
+
+		if ($request->getAcceptsJson())
+			return $this->asJson(['success' => true]);
+
+		\Craft::$app->session->setNotice(
+			CartNotices::t('Notice deleted')
+		);
+
+		return $this->redirectToPostedUrl($notice);
 	}
 
 }

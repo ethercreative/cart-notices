@@ -42,6 +42,32 @@ class Install extends Migration
 			'uid'         => $this->uid(),
 		]);
 
+		$this->createTable('{{%cart-notices_notice_product}}', [
+			'id'        => $this->primaryKey(),
+			'siteId'    => $this->integer()->notNull(),
+
+			'noticeId'  => $this->integer()->notNull(),
+			'productId' => $this->integer()->notNull(),
+			'sortOrder' => $this->smallInteger()->null(),
+
+			'dateCreated' => $this->dateTime()->notNull(),
+			'dateUpdated' => $this->dateTime()->notNull(),
+			'uid'         => $this->uid(),
+		]);
+
+		$this->createTable('{{%cart-notices_notice_category}}', [
+			'id'        => $this->primaryKey(),
+			'siteId'    => $this->integer()->notNull(),
+
+			'noticeId'   => $this->integer()->notNull(),
+			'categoryId' => $this->integer()->notNull(),
+			'sortOrder'  => $this->smallInteger()->null(),
+
+			'dateCreated' => $this->dateTime()->notNull(),
+			'dateUpdated' => $this->dateTime()->notNull(),
+			'uid'         => $this->uid(),
+		]);
+
 		$this->addForeignKey(
 			$this->db->getForeignKeyName('{{%cart-notices}}', 'id'),
 			'{{%cart-notices}}',
@@ -60,6 +86,46 @@ class Install extends Migration
 			'id',
 			'CASCADE',
 			'CASCADE'
+		);
+
+		$this->addForeignKey(
+			$this->db->getForeignKeyName('{{%cart-notices_notice_product}}', 'noticeId'),
+			'{{%cart-notices_notice_product}}',
+			'noticeId',
+			'{{%cart-notices}}',
+			'id',
+			'CASCADE',
+			null
+		);
+
+		$this->addForeignKey(
+			$this->db->getForeignKeyName('{{%cart-notices_notice_product}}', 'productId'),
+			'{{%cart-notices_notice_product}}',
+			'productId',
+			'{{%commerce_products}}',
+			'id',
+			'CASCADE',
+			null
+		);
+
+		$this->addForeignKey(
+			$this->db->getForeignKeyName('{{%cart-notices_notice_category}}', 'noticeId'),
+			'{{%cart-notices_notice_category}}',
+			'noticeId',
+			'{{%cart-notices}}',
+			'id',
+			'CASCADE',
+			null
+		);
+
+		$this->addForeignKey(
+			$this->db->getForeignKeyName('{{%cart-notices_notice_category}}', 'categoryId'),
+			'{{%cart-notices_notice_category}}',
+			'categoryId',
+			'{{%categories}}',
+			'id',
+			'CASCADE',
+			null
 		);
 
 		return true;

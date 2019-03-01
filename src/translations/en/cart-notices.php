@@ -56,8 +56,21 @@ return [
 
 	'Couldn\'t duplicate notice' => 'Couldn\'t duplicate notice',
 	'Couldn\'t save notice' => 'Couldn\'t save notice',
+	'Couldn\'t delete notice' => 'Couldn\'t delete notice',
 	'Notice saved' => 'Notice saved',
+	'Notice deleted' => 'Notice deleted',
 
 	'All Notices' => 'All Notices',
 	'Types' => 'Types',
+
+	'Everyday' => 'Everyday',
+	'Weekdays' => 'Weekdays',
+	'Weekends' => 'Weekends',
+	'Monday' => 'Monday',
+	'Tuesday' => 'Tuesday',
+	'Wednesday' => 'Wednesday',
+	'Thursday' => 'Thursday',
+	'Friday' => 'Friday',
+	'Saturday' => 'Saturday',
+	'Sunday' => 'Sunday',
 ];
