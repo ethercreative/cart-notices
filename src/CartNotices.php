@@ -96,6 +96,14 @@ class CartNotices extends Plugin
 	// Events
 	// =========================================================================
 
+	protected function beforeInstall (): bool
+	{
+		if (!\Craft::$app->getPlugins()->isPluginInstalled('commerce'))
+			throw new \Exception('Commerce is required for this plugin to be installed!');
+
+		return parent::beforeInstall();
+	}
+
 	public function onVariableInit (Event $e)
 	{
 		/** @var CraftVariable $variable */

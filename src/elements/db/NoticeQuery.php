@@ -66,6 +66,12 @@ class NoticeQuery extends ElementQuery
 	// Events
 	// =========================================================================
 
+	/**
+	 * @return bool
+	 * @throws \Throwable
+	 * @throws \craft\errors\ElementNotFoundException
+	 * @throws \yii\base\Exception
+	 */
 	protected function beforePrepare (): bool
 	{
 		$this->joinElementTable('cart-notices');
@@ -154,12 +160,13 @@ SQL;
 		// Products in Cart
 		// ---------------------------------------------------------------------
 
-		// TODO: this
+		// TODO: line item purchasable product ids related to notices
 
 		// Categories in Cart
 		// ---------------------------------------------------------------------
 
-		// TODO: this
+		// TODO: line item purchasable ids related to categories related to notices
+		//  and: line item purchasable product ids related to categories related to notices
 
 		return parent::beforePrepare();
 	}
