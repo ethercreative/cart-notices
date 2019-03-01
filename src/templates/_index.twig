@@ -1,0 +1,9 @@
+{% extends '_layouts/elementindex' %}
+{% set title = 'Notices'|t('cart-notices') %}
+{% set elementType = 'ether\\cartnotices\\elements\\Notice' %}
+{% do craft.app.view.registerAssetBundle('ether\\cartnotices\\web\\assets\\CartNoticesAsset') %}
+
+{% js %}
+	window.defaultType = '{{ defaultType }}';
+	window.noticeTypes = {{ noticeTypes|json_encode|raw }};
+{% endjs %}

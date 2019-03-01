@@ -10,7 +10,6 @@ namespace ether\cartnotices\elements\db;
 
 use craft\elements\db\ElementQuery;
 use craft\helpers\Db;
-use ether\cartnotices\enums\Types;
 
 /**
  * Class NoticeQuery
@@ -25,7 +24,7 @@ class NoticeQuery extends ElementQuery
 	// =========================================================================
 
 	/** @var string */
-	public $type = Types::MinimumAmount;
+	public $type;
 
 	// Setters
 	// =========================================================================
@@ -45,13 +44,13 @@ class NoticeQuery extends ElementQuery
 		$this->joinElementTable('cart-notices');
 
 		$this->query->select([
-			'cart-notices.type',
+			'cart-notices.*',
 		]);
 
 		if ($this->type)
 		{
 			$this->subQuery->andWhere(
-				Db::parseParam('products.type', $this->type)
+				Db::parseParam('cart-notices.type', $this->type)
 			);
 		}
 

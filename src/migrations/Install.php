@@ -25,9 +25,17 @@ class Install extends Migration
 			return false;
 
 		$this->createTable('{{%cart-notices}}', [
-			'id' => $this->primaryKey(),
+			'id'     => $this->primaryKey(),
+			'siteId' => $this->integer()->notNull(),
 
-			'type' => $this->string()->notNull(),
+			'type'      => $this->string()->notNull(),
+			'target'    => $this->float(),
+			'threshold' => $this->float(),
+			'hour'      => $this->integer(),
+			'days'      => $this->string(),
+			'referer'   => $this->string(255),
+			'minQty'    => $this->integer(),
+			'maxQty'    => $this->integer(),
 
 			'dateCreated' => $this->dateTime()->notNull(),
 			'dateUpdated' => $this->dateTime()->notNull(),
@@ -42,6 +50,16 @@ class Install extends Migration
 			'id',
 			'CASCADE',
 			null
+		);
+
+		$this->addForeignKey(
+			$this->db->getForeignKeyName('{{%cart-notices}}', 'siteId'),
+			'{{%cart-notices}}',
+			'siteId',
+			'{{%sites}}',
+			'id',
+			'CASCADE',
+			'CASCADE'
 		);
 
 		return true;

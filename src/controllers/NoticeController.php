@@ -8,9 +8,14 @@
 
 namespace ether\cartnotices\controllers;
 
+use craft\errors\InvalidElementException;
+use craft\helpers\UrlHelper;
 use craft\web\Controller;
+use ether\cartnotices\CartNotices;
 use ether\cartnotices\elements\Notice;
+use ether\cartnotices\enums\Types;
 use yii\web\NotFoundHttpException;
+use yii\web\ServerErrorHttpException;
 
 /**
  * Class NoticeController
@@ -20,7 +25,29 @@ use yii\web\NotFoundHttpException;
  */
 class NoticeController extends Controller
 {
-	
+
+	public function actionIndex ()
+	{
+		$types = [];
+
+		foreach (Types::getSelectOptions() as $handle => $name)
+			$types[] = compact('handle', 'name');
+
+		return $this->renderTemplate('cart-notices/_index', [
+			'defaultType' => Types::MinimumAmount,
+			'noticeTypes' => $types,
+		]);
+	}
+
+	/**
+	 * @param int|null    $noticeId
+	 * @param string|null $siteHandle
+	 * @param Notice|null $notice
+	 *
+	 * @return string
+	 * @throws NotFoundHttpException
+	 * @throws \craft\errors\SiteNotFoundException
+	 */
 	public function actionEdit (
 		int $noticeId = null,
 		string $siteHandle = null,
@@ -28,7 +55,9 @@ class NoticeController extends Controller
 	) {
 		$variables = [
 			'noticeId' => $noticeId,
-			'notice'   => $notice,
+			'fullPageForm' => true,
+			'fieldLayout' => \Craft::$app->getFields()->getLayoutByType(Notice::class),
+			'typeOptions' => Types::getSelectOptions(),
 		];
 
 		if ($siteHandle !== null)
@@ -40,8 +69,191 @@ class NoticeController extends Controller
 					'Invalid site handle: ' . $siteHandle
 				);
 		}
+		else
+		{
+			$variables['site'] = \Craft::$app->getSites()->getPrimarySite();
+		}
 
-		// TODO: this
+		// Breadcrumbs
+		$variables['crumbs'] = [
+			[
+				'label' => CartNotices::t('Cart Notices'),
+				'url'   => UrlHelper::url('cart-notices'),
+			]
+		];
+
+		// Notice
+		if ($notice)
+		{
+			$variables['notice'] = $notice;
+		}
+		else
+		{
+			if ($noticeId)
+			{
+				$variables['notice'] = Notice::find()
+				                             ->id($noticeId)
+				                             ->siteId($variables['site']->id)
+				                             ->one();
+
+				if (!$variables['notice'])
+					throw new NotFoundHttpException('Notice not found');
+
+				$variables['title'] = $variables['notice']->title;
+			}
+			else
+			{
+				$variables['notice']         = new Notice();
+				$variables['notice']->siteId = $variables['site']->id;
+
+				$variables['title'] = CartNotices::t('Create a new notice');
+			}
+		}
+
+		// Type
+		if ($noticeId || $notice)
+		{
+			$variables['type'] = $variables['notice']->type;
+		}
+		else
+		{
+			$variables['type'] = \Craft::$app->request->getQueryParam(
+				'type',
+				$variables['notice']->type
+			);
+		}
+
+		// Urls
+		$variables['nextNoticeUrl'] = UrlHelper::url('tags/new');
+		$variables['continueEditingUrl'] = 'cart-notices/{id}';
+
+		if (\Craft::$app->isMultiSite)
+		{
+			$variables['continueEditingUrl'] .= '/{site.handle}';
+			$variables['nextNoticeUrl']      .= '/' . $variables['site']->handle;
+		}
+
+		$variables['saveShortcutRedirect'] = $variables['continueEditingUrl'];
+
+		return $this->renderTemplate(
+			'cart-notices/_edit',
+			$variables
+		);
+	}
+
+	public function actionSave ()
+	{
+		$this->requirePostRequest();
+		$request = \Craft::$app->request;
+
+		$noticeId = $request->getBodyParam('noticeId');
+		$siteId = $request->getBodyParam(
+			'siteId',
+			\Craft::$app->getSites()->getPrimarySite()->id
+		);
+
+		// Get Notice
+		if ($noticeId)
+		{
+			$notice = Notice::find()
+				->id($noticeId)
+				->siteId($siteId)
+				->one();
+
+			if (!$notice)
+				throw new NotFoundHttpException('Notice not found');
+		}
+		else
+		{
+			$notice = new Notice();
+			$notice->siteId = $siteId;
+		}
+
+		// Duplicate?
+		if ((bool) $request->getBodyParam('duplicate'))
+		{
+			try
+			{
+				$notice = \Craft::$app->elements->duplicateElement($notice);
+			} catch (InvalidElementException $e) {
+				/** @var Notice $clone */
+				$clone = $e->element;
+
+				if ($request->getAcceptsJson())
+					return $this->asJson(
+						[
+							'success' => false,
+							'errors'  => $clone->getErrors(),
+						]
+					);
+
+				\Craft::$app->session->setError(
+					CartNotices::t('Couldn\'t duplicate notice')
+				);
+
+				$notice->addErrors($clone->getErrors());
+
+				\Craft::$app->urlManager->setRouteParams([
+					'notice' => $notice,
+				]);
+
+				return null;
+			} catch (\Throwable $e) {
+				throw new ServerErrorHttpException(
+					'An error occurred when duplicating the notice.',
+					0,
+					$e
+				);
+			}
+		}
+
+		// Populate
+		$notice->title = $request->getBodyParam('title', $notice->title);
+		$notice->setFieldValuesFromRequest(
+			$request->getParam('fieldsLocation', 'fields')
+		);
+
+		$notice->type      = $request->getParam('type');
+		$notice->target    = $request->getParam('target');
+		$notice->threshold = $request->getParam('threshold');
+		$notice->hour      = $request->getParam('hour');
+		$notice->days      = $request->getParam('days');
+		$notice->referer   = $request->getParam('referer');
+		$notice->minQty    = $request->getParam('minQty');
+		$notice->maxQty    = $request->getParam('maxQty');
+
+		// Save
+		if (!\Craft::$app->elements->saveElement($notice))
+		{
+			if ($request->getAcceptsJson())
+				return $this->asJson([
+					'errors' => $notice->getErrors(),
+				]);
+
+			\Craft::$app->getSession()->setError(
+				CartNotices::t('Couldn\'t save notice')
+			);
+
+			// Send the entry back to the template
+			\Craft::$app->getUrlManager()->setRouteParams([
+				'notice' => $notice
+			]);
+
+			return null;
+		}
+
+		if ($request->getAcceptsJson())
+		{
+			return $this->asJson([
+				'success' => true,
+				'notice' => $notice,
+			]);
+		}
+		\Craft::$app->getSession()->setNotice(
+			CartNotices::t('Notice saved')
+		);
+
+		return $this->redirectToPostedUrl(compact('notice'));
 	}
 
 }

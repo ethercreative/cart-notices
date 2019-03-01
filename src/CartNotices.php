@@ -102,10 +102,11 @@ class CartNotices extends Plugin
 
 	public function onRegisterCpUrlRules (RegisterUrlRulesEvent $event)
 	{
+		$event->rules['cart-notices'] = 'cart-notices/notice/index';
 		$event->rules['cart-notices/new'] = 'cart-notices/notice/edit';
 		$event->rules['cart-notices/new/<siteHandle:{handle}>'] = 'cart-notices/notice/edit';
-		$event->rules['cart-notices/<noticeId:\d+><slug:(?:-{slug})?>'] = 'cart-notices/notice/edit';
-		$event->rules['cart-notices/<noticeId:\d+><slug:(?:-{slug})?>/<siteHandle:{handle}>'] = 'cart-notices/notice/edit';
+		$event->rules['cart-notices/<noticeId:\d+>'] = 'cart-notices/notice/edit';
+		$event->rules['cart-notices/<noticeId:\d+>/<siteHandle:{handle}>'] = 'cart-notices/notice/edit';
 	}
 
 	// Helpers

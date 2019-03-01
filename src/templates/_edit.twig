@@ -1,0 +1,408 @@
+{% extends '_layouts/cp' %}
+{% import '_includes/forms' as forms %}
+
+{% block contextMenu %}
+	{% if craft.app.getIsMultiSite() %}
+		<div class="btn menubtn sitemenubtn"
+		     data-icon="world">{{ notice.site.name|t('site') }}</div>
+		<div class="menu">
+			<ul class="padded">
+				{% for site in craft.app.sites.allSites %}
+					{% set status = 'enabled' %}
+					<li>
+						{% if site.id == notice.siteId %}
+							<a class="sel" data-site-id="{{ site.id }}">
+								<div class="status {{ status }}"></div>{{ site.name|t('site') }}
+							</a>
+						{% else %}
+							{% set url = url("cart-notices/#{notice.id}/#{site.handle}") %}
+							<a href="{{ url }}" data-site-id="{{ site.id }}">
+								<div class="status {{ status }}"></div>{{ site.name|t('site') }}
+							</a>
+						{% endif %}
+					</li>
+				{% endfor %}
+			</ul>
+		</div>
+	{% endif %}
+{% endblock %}
+
+{% block actionButton %}
+	<input type="hidden" name="action" value="cart-notices/notice/save">
+	{{ redirectInput('cart-notices') }}
+
+	<div class="btngroup">
+		<input type="submit" class="btn submit" value="{{ 'Save'|t('app') }}">
+
+		<div class="btn submit menubtn"></div>
+		<div class="menu">
+			<ul>
+				<li>
+					<a
+						class="formsubmit"
+						data-redirect="{{ continueEditingUrl|hash }}"
+					>
+						{{ forms.optionShortcutLabel('S') }}
+						{{ "Save and continue editing"|t('app') }}
+					</a>
+				</li>
+
+				<li>
+					<a
+						class="formsubmit"
+						data-redirect="{{ nextNoticeUrl|hash }}"
+					>
+						{{ "Save and add another"|t('app') }}
+					</a>
+				</li>
+
+				{% if notice.id %}
+					<li>
+						<a
+							class="formsubmit"
+							data-param="duplicate"
+							data-value="1"
+							data-redirect="{{ (continueEditingUrl~'#')|hash }}"
+						>
+							{{ "Save as a new notice"|t('cart-notices') }}
+						</a>
+					</li>
+				{% endif %}
+			</ul>
+
+			{% if notice.id %}
+				<hr>
+
+				<ul>
+					<li>
+						<a
+							class="formsubmit error"
+							data-action="cart-notices/notice/delete"
+							data-confirm="{{ 'Are you sure you want to delete this notice?'|t('cart-notices') }}"
+							data-redirect="{{ 'notices#'|hash }}"
+						>
+							{{ 'Delete'|t('app') }}
+						</a>
+					</li>
+				</ul>
+			{% endif %}
+		</div>
+	</div>
+{% endblock %}
+
+{% block content %}
+	{% if notice.id %}
+		<input type="hidden" name="noticeId" value="{{ notice.id }}">
+	{% endif %}
+	{% if craft.app.getIsMultiSite() %}
+		<input type="hidden" name="siteId" value="{{ notice.siteId }}">
+	{% endif %}
+
+	<div id="fields">
+		{{ forms.textField({
+			label: 'Title'|t('app'),
+			siteId: notice.siteId,
+			id: 'title',
+			name: 'title',
+			value: notice.title,
+			errors: notice.getErrors('title'),
+			first: true,
+			autofocus: true,
+			required: true,
+			maxlength: 255
+		}) }}
+
+		{% include "_includes/fields" with {
+			fields:  fieldLayout.getFields(),
+			element: notice,
+		} only %}
+	</div>
+{% endblock %}
+
+{% block details %}
+	<div id="settings" class="meta" style="display:none">
+		{% set typeSelect %}
+			<div class="select">
+				<select name="type" id="type" v-model="type">
+					{% for key, option in typeOptions %}
+						<option value="{{ key }}"{{ key == notice.type ? ' selected' }}>
+							{{- option -}}
+						</option>
+					{% endfor %}
+				</select>
+			</div>
+		{% endset %}
+		{{ forms.field({
+			label: 'Type'|t('cart-notices'),
+			errors: notice.getErrors('type'),
+		}, typeSelect) }}
+
+		{# Minimum Amount #}
+
+		{% embed '_includes/forms/field' with {
+			notice: notice,
+			errors: notice.getErrors('target'),
+		} only %}
+			{% import '_includes/forms' as forms %}
+			{% block attr %}
+				v-bind:style="show('minimum-amount')"
+			{% endblock %}
+			{% set label %}
+				{{ 'Target'|t('cart-notices') }}
+				<div class="info">
+					{{ 'Cart total must be **less** than or equal to this amount'|t('cart-notices')|md }}
+				</div>
+			{% endset %}
+			{% set input %}
+				{{ forms.text({
+					type: 'number',
+					name: 'target',
+					id: 'target',
+					value: notice.target,
+				}) }}
+			{% endset %}
+		{% endembed %}
+
+		{% embed '_includes/forms/field' with {
+			notice: notice,
+			errors: notice.getErrors('threshold'),
+		} only %}
+			{% import '_includes/forms' as forms %}
+			{% block attr %}
+				v-bind:style="show('minimum-amount')"
+			{% endblock %}
+			{% set label %}
+				{{ 'Threshold'|t('cart-notices') }}
+				<div class="info">
+					{{ 'Cart total must be **greater** than or equal to this amount'|t('cart-notices')|md }}
+				</div>
+			{% endset %}
+			{% set input %}
+				{{ forms.text({
+					type: 'number',
+					name: 'threshold',
+					id: 'threshold',
+					value: notice.threshold,
+				}) }}
+			{% endset %}
+		{% endembed %}
+
+		{# Deadline #}
+
+		{% embed '_includes/forms/field' with {
+			notice: notice,
+			errors: notice.getErrors('hour'),
+		} only %}
+			{% import '_includes/forms' as forms %}
+			{% block attr %}
+				v-bind:style="show('deadline')"
+			{% endblock %}
+			{% set label %}
+				{{ 'Hour'|t('cart-notices') }}
+				<div class="info">
+					{{ 'Deadline hour, can be 1 - 24'|t('cart-notices')|md }}
+				</div>
+			{% endset %}
+			{% set input %}
+				{{ forms.text({
+					type: 'number',
+					name: 'hour',
+					id: 'hour',
+					value: notice.hour,
+				}) }}
+			{% endset %}
+		{% endembed %}
+
+		{% embed '_includes/forms/field' with {
+			notice: notice,
+			errors: notice.getErrors('days'),
+		} only %}
+			{% import '_includes/forms' as forms %}
+			{% block attr %}
+				v-bind:style="show('deadline')"
+			{% endblock %}
+			{% set label %}
+				{{ 'Days'|t('cart-notices') }}
+				<div class="info">
+					{{ 'Days the notice is active'|t('cart-notices')|md }}
+				</div>
+			{% endset %}
+			{% set input %}
+				{{ forms.checkboxSelect({
+					name: 'days',
+					id: 'days',
+					value: notice.days,
+					showAllOption: true,
+					options: {
+						1: 'Monday'|t('app'),
+						2: 'Tuesday'|t('app'),
+						3: 'Wednesday'|t('app'),
+						4: 'Thursday'|t('app'),
+						5: 'Friday'|t('app'),
+						6: 'Saturday'|t('app'),
+						0: 'Sunday'|t('app'),
+					}
+				}) }}
+			{% endset %}
+		{% endembed %}
+
+		{# Referer #}
+
+		{% embed '_includes/forms/field' with {
+			notice: notice,
+			errors: notice.getErrors('referer'),
+		} only %}
+			{% import '_includes/forms' as forms %}
+			{% block attr %}
+				v-bind:style="show('referer')"
+			{% endblock %}
+			{% set label %}
+				{{ 'Referer'|t('cart-notices') }}
+				<div class="info">
+					{{ 'The refering site, can be a PCRE regex'|t('cart-notices')|md }}
+				</div>
+			{% endset %}
+			{% set input %}
+				{{ forms.text({
+					name: 'referer',
+					id: 'referer',
+					value: notice.referer,
+				}) }}
+			{% endset %}
+		{% endembed %}
+
+		{# Products in Cart #}
+
+		{% embed '_includes/forms/field' with {
+			notice: notice,
+			errors: notice.getErrors('products'),
+		} only %}
+			{% import '_includes/forms' as forms %}
+			{% block attr %}
+				v-bind:style="show('products-in-cart')"
+			{% endblock %}
+			{% set label %}
+				{{ 'Products'|t('cart-notices') }}
+				<div class="info">
+					{{ 'The products that must be in the cart'|t('cart-notices')|md }}
+				</div>
+			{% endset %}
+			{% set input %}
+				{{ forms.elementSelect({
+					elementType: 'craft\\commerce\\elements\\Product',
+					name: 'products',
+					id: 'products',
+					elements: notice.products,
+				}) }}
+			{% endset %}
+		{% endembed %}
+
+		{% embed '_includes/forms/field' with {
+			notice: notice,
+			errors: notice.getErrors('minQty'),
+		} only %}
+			{% import '_includes/forms' as forms %}
+			{% block attr %}
+				v-bind:style="show('products-in-cart')"
+			{% endblock %}
+			{% set label %}
+				{{ 'Min Qty'|t('cart-notices') }}
+				<div class="info">
+					{{ 'Min quantity of any selected product'|t('cart-notices')|md }}
+				</div>
+			{% endset %}
+			{% set input %}
+				{{ forms.text({
+					type: 'number',
+					name: 'minQty',
+					id: 'minQty',
+					value: notice.minQty,
+				}) }}
+			{% endset %}
+		{% endembed %}
+
+		{% embed '_includes/forms/field' with {
+			notice: notice,
+			errors: notice.getErrors('maxQty'),
+		} only %}
+			{% import '_includes/forms' as forms %}
+			{% block attr %}
+				v-bind:style="show('products-in-cart')"
+			{% endblock %}
+			{% set label %}
+				{{ 'Max Qty'|t('cart-notices') }}
+				<div class="info">
+					{{ 'Max quantity of any selected product'|t('cart-notices')|md }}
+				</div>
+			{% endset %}
+			{% set input %}
+				{{ forms.text({
+					type: 'number',
+					name: 'maxQty',
+					id: 'maxQty',
+					value: notice.maxQty,
+				}) }}
+			{% endset %}
+		{% endembed %}
+
+		{# Categories in Cart #}
+
+		{% embed '_includes/forms/field' with {
+			notice: notice,
+			errors: notice.getErrors('categories'),
+		} only %}
+			{% import '_includes/forms' as forms %}
+			{% block attr %}
+				v-bind:style="show('categories-in-cart')"
+			{% endblock %}
+			{% set label %}
+				{{ 'Categories'|t('cart-notices') }}
+				<div class="info">
+					{{ 'The categories that products in the cart must have'|t('cart-notices')|md }}
+				</div>
+			{% endset %}
+			{% set input %}
+				{{ forms.elementSelect({
+					elementType: 'craft\\elements\\Category',
+					name: 'categories',
+					id: 'categories',
+					elements: notice.categories,
+				}) }}
+			{% endset %}
+		{% endembed %}
+	</div>
+
+	{% if notice.id %}
+		<div class="meta read-only">
+			<div class="data">
+				<h5 class="heading">{{ "Created at"|t('app') }}</h5>
+				<div class="value">{{ notice.dateCreated|datetime('short') }}</div>
+			</div>
+			<div class="data">
+				<h5 class="heading">{{ "Updated at"|t('app') }}</h5>
+				<div class="value">{{ notice.dateUpdated|datetime('short') }}</div>
+			</div>
+		</div>
+	{% endif %}
+{% endblock %}
+
+{% do craft.app.view.registerAssetBundle('craft\\web\\assets\\vue\\VueAsset') %}
+{% js %}
+const settings = document.getElementById('settings');
+settings.style.display = 'block';
+new Vue({
+	el: settings,
+	data () {
+		return {
+			type: '{{ type }}',
+		};
+	},
+	methods: {
+		show (target) {
+			return {
+				display: this.type === target ? 'flex' : 'none',
+			};
+		}
+	},
+});
+{% endjs %}

@@ -14,6 +14,7 @@ use craft\elements\db\ElementQueryInterface;
 use ether\cartnotices\CartNotices;
 use ether\cartnotices\elements\db\NoticeQuery;
 use ether\cartnotices\enums\Types;
+use MongoDB\BSON\Type;
 
 /**
  * Class Notice
@@ -29,6 +30,40 @@ class Notice extends Element
 
 	/** @var string */
 	public $type = Types::MinimumAmount;
+
+	/** @var float - Minimum amount: total must be <= this */
+	public $target;
+
+	/** @var float - Minimum amount: total must be >= this */
+	public $threshold;
+
+	/** @var int - Deadline: deadline hour, can be 1 - 24 */
+	public $hour;
+
+	/** @var array - Deadline: days the notice is active */
+	public $days;
+
+	/** @var string - Referer: the referring site, can be PCRE */
+	public $referer;
+
+	/** @var int - Products in Cart: Min quantity of any selected product */
+	public $minQty;
+
+	/** @var int - Products in Cart: Max quantity of any selected product */
+	public $maxQty;
+
+	// Getters
+	// =========================================================================
+
+	public function getProducts ()
+	{
+		return []; // TODO: this
+	}
+
+	public function getCategories ()
+	{
+		return []; // TODO: this
+	}
 
 	// Methods
 	// =========================================================================
@@ -91,7 +126,10 @@ class Notice extends Element
 
 	public function getCpEditUrl ()
 	{
-		return 'cart-notices/' . $this->id . '-' . $this->slug;
+		$url = 'cart-notices/' . $this->id;
+		$url .= '/' . \Craft::$app->getSites()->getSiteById($this->siteId)->handle;
+
+		return $url;
 	}
 
 	protected static function defineActions (string $source = null): array
@@ -104,14 +142,54 @@ class Notice extends Element
 	protected static function defineTableAttributes (): array
 	{
 		return [
-			'title' => \Craft::t('app', 'Title'),
-			'type' => CartNotices::t('Type'),
+			'title'       => \Craft::t('app', 'Title'),
+			'type'        => CartNotices::t('Type'),
+			'target'      => CartNotices::t('Target'),
+			'threshold'   => CartNotices::t('Threshold'),
+			'hour'        => CartNotices::t('Hour'),
+			'days'        => CartNotices::t('Days'),
+			'referer'     => CartNotices::t('Referer'),
+			'minQty'      => CartNotices::t('Min Qty'),
+			'maxQty'      => CartNotices::t('Max Qty'),
+			'products'    => CartNotices::t('Products'),
+			'categories'  => CartNotices::t('Categories'),
+			'dateCreated' => \Craft::t('app', 'Date Created'),
+			'dateUpdated' => \Craft::t('app', 'Date Updated'),
 		];
 	}
 
 	public static function defaultTableAttributes (string $source): array
 	{
-		return ['title', 'type'];
+		$attrs = ['title'];
+
+		switch ($source)
+		{
+			case Types::MinimumAmount:
+				$attrs[] = 'target';
+				$attrs[] = 'threshold';
+				break;
+			case Types::Deadline:
+				$attrs[] = 'hour';
+				$attrs[] = 'days';
+				break;
+			case Types::Referer:
+				$attrs[] = 'referer';
+				break;
+			case Types::ProductsInCart:
+				$attrs[] = 'products';
+				$attrs[] = 'minQty';
+				$attrs[] = 'maxQty';
+				break;
+			case Types::CategoriesInCart:
+				$attrs[] = 'categories';
+				break;
+			default:
+				$attrs[] = 'type';
+		}
+
+		$attrs[] = 'dateCreated';
+
+		return $attrs;
 	}
 
 	protected function tableAttributeHtml (string $attribute): string
@@ -127,7 +205,39 @@ class Notice extends Element
 
 	protected static function defineSearchableAttributes (): array
 	{
-		return ['type'];
+		return [
+			'type',
+			'dateCreated',
+			'dateUpdated',
+			'referer',
+		];
+	}
+
+	protected static function defineSources (string $context = null): array
+	{
+		$sources = [
+			[
+				'key'         => '*',
+				'label'       => CartNotices::t('All Notices'),
+				'criteria'    => [],
+				'defaultSort' => ['dateCreated', 'desc']
+			],
+			[ 'heading' => CartNotices::t('Types') ]
+		];
+
+		foreach (Types::getSelectOptions() as $type => $label)
+		{
+			$sources[] = [
+				'key' => $type,
+				'label' => $label,
+				'criteria' => [
+					'type' => $type,
+				],
+				'defaultSort' => ['dateCreated', 'desc']
+			];
+		}
+
+		return $sources;
 	}
 
 	// Events
@@ -138,18 +248,36 @@ class Notice extends Element
 		if ($isNew)
 		{
 			\Craft::$app->db->createCommand()
-				->insert('{{%products}}', [
-					'id'   => $this->id,
-					'type' => $this->type,
+				->insert('{{%cart-notices}}', [
+					'id'        => $this->id,
+					'siteId'    => $this->siteId,
+					'type'      => $this->type,
+					'target'    => $this->target,
+					'threshold' => $this->threshold,
+					'hour'      => $this->hour,
+					'days'      => $this->days,
+					'referer'   => $this->referer,
+					'minQty'    => $this->minQty,
+					'maxQty'    => $this->maxQty,
 				])
 				->execute();
 		}
 		else
 		{
 			\Craft::$app->db->createCommand()
-				->update('{{%products}}', [
-					'type' => $this->type,
-				], ['id' => $this->id])
+				->update('{{%cart-notices}}', [
+					'type'      => $this->type,
+					'target'    => $this->target,
+					'threshold' => $this->threshold,
+					'hour'      => $this->hour,
+					'days'      => $this->days,
+					'referer'   => $this->referer,
+					'minQty'    => $this->minQty,
+					'maxQty'    => $this->maxQty,
+				], [
+					'id'     => $this->id,
+					'siteId' => $this->siteId,
+				])
 				->execute();
 		}
 
