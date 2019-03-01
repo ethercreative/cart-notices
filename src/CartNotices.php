@@ -10,6 +10,7 @@ namespace ether\cartnotices;
 
 use craft\base\Plugin;
 use craft\events\RegisterUrlRulesEvent;
+use craft\helpers\UrlHelper;
 use craft\web\Controller;
 use craft\web\twig\variables\CraftVariable;
 use craft\web\UrlManager;
@@ -53,6 +54,18 @@ class CartNotices extends Plugin
 		);
 	}
 
+	public function getCpNavItem ()
+	{
+		$item = parent::getCpNavItem();
+		$item['subnav'] = [
+			'notices' => ['label' => 'Notices', 'url' => 'cart-notices'],
+			'settings' => ['label' => 'Settings', 'url' => 'cart-notices/settings'],
+		];
+
+		return $item;
+	}
+
+
 	// Settings
 	// =========================================================================
 
@@ -66,16 +79,9 @@ class CartNotices extends Plugin
 	 */
 	public function getSettingsResponse ()
 	{
-		/** @var Controller $controller */
-		$controller = \Craft::$app->controller;
+		$url = UrlHelper::cpUrl('cart-notices/settings');
 
-		return $controller->renderTemplate(
-			'cart-notices/_settings',
-			[
-				'plugin' => $this,
-				'fieldLayout' => \Craft::$app->getFields()->getLayoutByType(Notice::class),
-			]
-		);
+		return \Craft::$app->controller->redirect($url);
 	}
 
 	public function beforeSaveSettings (): bool
@@ -102,11 +108,16 @@ class CartNotices extends Plugin
 
 	public function onRegisterCpUrlRules (RegisterUrlRulesEvent $event)
 	{
-		$event->rules['cart-notices'] = 'cart-notices/notice/index';
+		$event->rules['cart-notices/settings'] = 'cart-notices/settings/index';
+		$event->rules['cart-notices/settings/fields'] = 'cart-notices/settings/fields';
+
 		$event->rules['cart-notices/new'] = 'cart-notices/notice/edit';
 		$event->rules['cart-notices/new/<siteHandle:{handle}>'] = 'cart-notices/notice/edit';
 		$event->rules['cart-notices/<noticeId:\d+>'] = 'cart-notices/notice/edit';
 		$event->rules['cart-notices/<noticeId:\d+>/<siteHandle:{handle}>'] = 'cart-notices/notice/edit';
+
+		$event->rules['cart-notices'] = 'cart-notices/notice/index';
+		$event->rules['cart-notices/<type>'] = 'cart-notices/notice/index';
 	}
 
 	// Helpers

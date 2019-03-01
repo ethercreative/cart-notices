@@ -160,8 +160,7 @@ class Notice extends Element
 
 	public function getCpEditUrl ()
 	{
-		$url = 'cart-notices/' . $this->id;
-		$url .= '/' . \Craft::$app->getSites()->getSiteById($this->siteId)->handle;
+		$url = $this->id . '/' . \Craft::$app->getSites()->getSiteById($this->siteId)->handle;
 
 		return $url;
 	}
@@ -259,7 +258,9 @@ class Notice extends Element
 			[
 				'key'         => '*',
 				'label'       => CartNotices::t('All Notices'),
-				'criteria'    => [],
+				'criteria'    => [
+					'filter' => false,
+				],
 				'defaultSort' => ['dateCreated', 'desc']
 			],
 			[ 'heading' => CartNotices::t('Types') ]
@@ -272,6 +273,7 @@ class Notice extends Element
 				'label' => $label,
 				'criteria' => [
 					'type' => $type,
+					'filter' => false,
 				],
 				'defaultSort' => ['dateCreated', 'desc']
 			];

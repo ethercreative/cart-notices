@@ -8,6 +8,7 @@
 
 namespace ether\cartnotices\controllers;
 
+use craft\base\Element;
 use craft\errors\InvalidElementException;
 use craft\helpers\UrlHelper;
 use craft\web\Controller;
@@ -91,10 +92,10 @@ class NoticeController extends Controller
 		{
 			if ($noticeId)
 			{
-				$variables['notice'] = Notice::find()
-					->id($noticeId)
-					->siteId($variables['site']->id)
-					->one();
+				$variables['notice'] = $this->_notice(
+					$noticeId,
+					$variables['site']->id
+				);
 
 				if (!$variables['notice'])
 					throw new NotFoundHttpException('Notice not found');
@@ -155,10 +156,7 @@ class NoticeController extends Controller
 		// Get Notice
 		if ($noticeId)
 		{
-			$notice = Notice::find()
-				->id($noticeId)
-				->siteId($siteId)
-				->one();
+			$notice = $this->_notice($noticeId, $siteId);
 
 			if (!$notice)
 				throw new NotFoundHttpException('Notice not found');
@@ -275,10 +273,7 @@ class NoticeController extends Controller
 		$noticeId = $request->getBodyParam('noticeId');
 		$siteId   = $request->getBodyParam('siteId');
 
-		$notice = Notice::find()
-			->id($noticeId)
-			->siteId($siteId)
-			->one();
+		$notice = $this->_notice($noticeId, $siteId);
 
 		if (!$notice)
 			throw new NotFoundHttpException('Notice not found');
@@ -308,6 +303,21 @@ class NoticeController extends Controller
 		);
 
 		return $this->redirectToPostedUrl($notice);
+	}
+
+	// Helpers
+	// =========================================================================
+
+	private function _notice ($id, $siteId = null)
+	{
+		$notice = Notice::find()
+			->id($id)
+			->filter(false);
+
+		if ($siteId)
+			$notice->siteId($siteId);
+
+		return $notice->one();
 	}
 
 }

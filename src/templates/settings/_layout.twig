@@ -1,0 +1,43 @@
+{% extends '_layouts/cp' %}
+{% requireAdmin %}
+
+{% set selectedSubnavItem = 'settings' %}
+
+{% set crumbs = [
+	{ label: 'Cart Notices'|t('cart-notices'), url: url('cart-notices') },
+	{ label: 'Settings'|t('app'), url: url('cart-notices/settings') }
+] %}
+
+{% set fullPageForm = true %}
+{% set title = title is defined ? title : plugin.name %}
+{% set docTitle = title %}
+
+{% block sidebar %}
+	<nav>
+		{% set nav = [
+			['', 'Sorting'],
+			['fields', 'Field Layout'],
+		] %}
+		{% set seg = craft.app.request.segments[2] ?? '' %}
+
+		<ul>
+			{% for item in nav %}
+				<li>
+					<a
+						href="{{ url('cart-notices/settings/' ~ item[0]) }}"
+						{{ seg == item[0] ? 'class="sel"'|raw }}
+					>
+						{{ item[1] }}
+					</a>
+				</li>
+			{% endfor %}
+		</ul>
+	</nav>
+{% endblock %}
+
+{% block content %}
+	<input type="hidden" name="action" value="plugins/save-plugin-settings">
+	<input type="hidden" name="pluginHandle" value="{{ plugin.handle }}">
+
+	{% block settingsContent %}{% endblock %}
+{% endblock %}

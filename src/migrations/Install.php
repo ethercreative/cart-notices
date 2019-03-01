@@ -133,6 +133,8 @@ class Install extends Migration
 
 	public function safeDown ()
 	{
+		$this->dropTableIfExists('{{%cart-notices_notice_product}}');
+		$this->dropTableIfExists('{{%cart-notices_notice_category}}');
 		$this->dropTableIfExists('{{%cart-notices}}');
 
 		return true;
