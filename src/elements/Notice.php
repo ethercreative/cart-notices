@@ -14,6 +14,7 @@ use craft\elements\actions\Restore;
 use craft\elements\Category;
 use craft\elements\db\ElementQueryInterface;
 use craft\helpers\ArrayHelper;
+use craft\helpers\ElementHelper;
 use craft\helpers\Json;
 use craft\helpers\UrlHelper;
 use ether\cartnotices\CartNotices;
@@ -115,7 +116,7 @@ class Notice extends Element
 
 	public static function isLocalized (): bool
 	{
-		return true;
+		return false;
 	}
 
 	public static function hasStatuses (): bool
@@ -389,11 +390,10 @@ class Notice extends Element
 	// =========================================================================
 
 	/**
-	 * TODO: Propagate if needed
+	 * @param      $target
+	 * @param      $ids
 	 *
-	 * @param $target
-	 * @param $ids
-	 *
+	 * @throws \yii\base\Exception
 	 * @throws \yii\db\Exception
 	 */
 	private function _saveRelations ($target, $ids)
@@ -409,6 +409,7 @@ class Notice extends Element
 		   ->execute();
 
 		$i = 0;
+		$values = [];
 		foreach ($ids as $id)
 		{
 			$values[] = [

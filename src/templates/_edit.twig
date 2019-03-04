@@ -1,7 +1,7 @@
 {% extends '_layouts/cp' %}
 {% import '_includes/forms' as forms %}
 
-{% block contextMenu %}
+{#{% block contextMenu %}
 	{% if craft.app.getIsMultiSite() %}
 		<div class="btn menubtn sitemenubtn"
 		     data-icon="world">{{ notice.site.name|t('site') }}</div>
@@ -25,7 +25,7 @@
 			</ul>
 		</div>
 	{% endif %}
-{% endblock %}
+{% endblock %}#}
 
 {% block actionButton %}
 	<input type="hidden" name="action" value="cart-notices/notice/save">
