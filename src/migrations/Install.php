@@ -28,6 +28,7 @@ class Install extends Migration
 			'id'     => $this->primaryKey(),
 			'siteId' => $this->integer()->notNull(),
 
+			'enabled'   => $this->boolean()->notNull(),
 			'type'      => $this->string()->notNull(),
 			'target'    => $this->float(),
 			'threshold' => $this->float(),
@@ -36,6 +37,7 @@ class Install extends Migration
 			'referer'   => $this->string(255),
 			'minQty'    => $this->integer(),
 			'maxQty'    => $this->integer(),
+			'sortOrder' => $this->smallInteger()->null(),
 
 			'dateCreated' => $this->dateTime()->notNull(),
 			'dateUpdated' => $this->dateTime()->notNull(),

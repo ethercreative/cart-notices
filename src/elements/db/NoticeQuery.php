@@ -214,6 +214,8 @@ SQL;
 			]
 		);
 
+		$this->subQuery->andWhere('[[cart-notices.enabled]] = true');
+
 		return parent::beforePrepare();
 	}
 

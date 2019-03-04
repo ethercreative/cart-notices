@@ -14,8 +14,8 @@
 
 {% block sidebar %}
 	<nav>
+		{# ['', 'Sorting'], #}
 		{% set nav = [
-			['', 'Sorting'],
 			['fields', 'Field Layout'],
 		] %}
 		{% set seg = craft.app.request.segments[2] ?? '' %}

@@ -221,6 +221,7 @@ class NoticeController extends Controller
 			$request->getParam('fieldsLocation', 'fields')
 		);
 
+		$notice->enabled     = $request->getParam('enabled');
 		$notice->type        = $request->getParam('type');
 		$notice->target      = $request->getParam('target');
 		$notice->threshold   = $request->getParam('threshold');
@@ -232,6 +233,7 @@ class NoticeController extends Controller
 		$notice->productIds  = $request->getParam('products', []);
 		$notice->categoryIds = $request->getParam('categories', []);
 
+		if ($notice->enabled === '') $notice->enabled = false;
 		if (!is_array($notice->productIds)) $notice->productIds = [];
 		if (!is_array($notice->categoryIds)) $notice->categoryIds = [];
 
@@ -322,6 +324,7 @@ class NoticeController extends Controller
 	{
 		$notice = Notice::find()
 			->id($id)
+			->anyStatus()
 			->filter(false);
 
 		if ($siteId)

@@ -14,7 +14,6 @@ use craft\elements\actions\Restore;
 use craft\elements\Category;
 use craft\elements\db\ElementQueryInterface;
 use craft\helpers\ArrayHelper;
-use craft\helpers\ElementHelper;
 use craft\helpers\Json;
 use craft\helpers\UrlHelper;
 use ether\cartnotices\CartNotices;
@@ -63,6 +62,9 @@ class Notice extends Element
 
 	/** @var int[] - Categories in Cart: The categories to check */
 	public $categoryIds = [];
+
+	/** @var int */
+	public $sortOrder = null;
 
 	/** @var Product[] */
 	private $_products;
@@ -336,6 +338,7 @@ class Notice extends Element
 				   ->insert('{{%cart-notices}}', [
 					   'id'        => $this->id,
 					   'siteId'    => $this->siteId,
+					   'enabled'   => $this->enabled,
 					   'type'      => $this->type,
 					   'target'    => $this->target,
 					   'threshold' => $this->threshold,
@@ -351,6 +354,7 @@ class Notice extends Element
 			{
 				$db->createCommand()
 				   ->update('{{%cart-notices}}', [
+					   'enabled'   => $this->enabled,
 					   'type'      => $this->type,
 					   'target'    => $this->target,
 					   'threshold' => $this->threshold,
