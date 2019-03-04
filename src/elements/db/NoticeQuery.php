@@ -14,8 +14,6 @@ use craft\commerce\models\LineItem;
 use craft\commerce\Plugin as Commerce;
 use craft\elements\db\ElementQuery;
 use craft\helpers\Db;
-use craft\helpers\Json;
-use craft\models\Site;
 use ether\cartnotices\enums\Types;
 
 /**
@@ -175,9 +173,9 @@ SQL;
 	FROM {{%cart-notices_notice_product}} [[np]]
 	INNER JOIN {{%cart-notices}} [[cn]] ON [[cn.id]] = [[np.noticeId]]
 	INNER JOIN {{%commerce_variants}} [[cv]] ON [[np.productId]] = [[cv.productId]]
-	INNER JOIN {{%commerce_lineitems}} [[li]] ON [[li.purchasableId]] = [[cv.id]]
+	INNER JOIN {{%commerce_lineitems}} [[li]] ON [[li.purchasableId]] = [[cv.id]] AND [[li.orderId]] = '$cart->id'
 	WHERE [[np.productId]] IN ('$productIds')
-	AND [[li.qty]] >= [[cn.minQty]] AND [[li.qty]] <= [[cn.maxQty]]
+	AND ([[li.qty]] BETWEEN COALESCE([[cn.minQty]], 0) AND COALESCE([[cn.maxQty]], 99999999))
 )
 SQL;
 

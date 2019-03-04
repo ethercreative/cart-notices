@@ -11,7 +11,6 @@ namespace ether\cartnotices;
 use craft\base\Plugin;
 use craft\events\RegisterUrlRulesEvent;
 use craft\helpers\UrlHelper;
-use craft\web\Controller;
 use craft\web\twig\variables\CraftVariable;
 use craft\web\UrlManager;
 use ether\cartnotices\elements\Notice;
