@@ -9,9 +9,13 @@
 namespace ether\cartnotices\elements\db;
 
 use craft\commerce\elements\Order;
+use craft\commerce\elements\Variant;
+use craft\commerce\models\LineItem;
 use craft\commerce\Plugin as Commerce;
 use craft\elements\db\ElementQuery;
 use craft\helpers\Db;
+use craft\helpers\Json;
+use craft\models\Site;
 use ether\cartnotices\enums\Types;
 
 /**
@@ -159,15 +163,87 @@ SQL;
 		// Products in Cart
 		// ---------------------------------------------------------------------
 
-		// TODO: line item purchasable product ids related to notices
+		$productIds = implode(
+			'\',\'',
+			$this->_lineItemProductIds($cart->lineItems)
+		);
+
+		$sql = <<<SQL
+[[cart-notices.type]] = :type4 AND 
+[[cart-notices.id]] IN (
+	SELECT [[np.noticeId]]
+	FROM {{%cart-notices_notice_product}} [[np]]
+	INNER JOIN {{%cart-notices}} [[cn]] ON [[cn.id]] = [[np.noticeId]]
+	INNER JOIN {{%commerce_variants}} [[cv]] ON [[np.productId]] = [[cv.productId]]
+	INNER JOIN {{%commerce_lineitems}} [[li]] ON [[li.purchasableId]] = [[cv.id]]
+	WHERE [[np.productId]] IN ('$productIds')
+	AND [[li.qty]] >= [[cn.minQty]] AND [[li.qty]] <= [[cn.maxQty]]
+)
+SQL;
+
+		$this->subQuery->orWhere(
+			$sql,
+			[
+				'type4' => Types::ProductsInCart,
+			]
+		);
+
 
 		// Categories in Cart
 		// ---------------------------------------------------------------------
 
-		// TODO: line item purchasable ids related to categories related to notices
-		//  and: line item purchasable product ids related to categories related to notices
+		$purchasableIds = implode(
+			'\',\'',
+			$this->_lineItemPurchasableIds($cart->lineItems)
+		);
+
+		$sql = <<<SQL
+[[cart-notices.type]] = :type5 AND
+[[cart-notices.id]] IN (
+	SELECT [[nc.noticeId]]
+	FROM {{%relations}} [[r]]
+	INNER JOIN {{%cart-notices_notice_category}} [[nc]] ON [[r.targetId]] = [[nc.categoryId]]
+	WHERE [[r.sourceId]] IN ('$productIds','$purchasableIds')
+)
+SQL;
+
+		$this->subQuery->orWhere(
+			$sql,
+			[
+				'type5' => Types::CategoriesInCart,
+			]
+		);
 
 		return parent::beforePrepare();
+	}
+
+	// Helpers
+	// =========================================================================
+
+	private function _lineItemProductIds (array $lineItems)
+	{
+		return array_reduce(
+			$lineItems,
+			function (array $a, LineItem $item) {
+				/** @var Variant $variant */
+				$variant = $item->purchasable;
+
+				if (!($variant instanceof Variant))
+					return $a;
+
+				$a[] = $variant->productId;
+
+				return $a;
+			},
+			[]
+		);
+	}
+
+	private function _lineItemPurchasableIds (array $lineItems)
+	{
+		return array_map(function (LineItem $item) {
+			return $item->purchasableId;
+		}, $lineItems);
 	}
 
 }

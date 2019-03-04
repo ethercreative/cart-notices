@@ -389,6 +389,8 @@ class Notice extends Element
 	// =========================================================================
 
 	/**
+	 * TODO: Propagate if needed
+	 *
 	 * @param $target
 	 * @param $ids
 	 *
