@@ -13,7 +13,6 @@ use craft\commerce\Plugin as Commerce;
 use craft\elements\db\ElementQuery;
 use craft\helpers\Db;
 use ether\cartnotices\enums\Types;
-use yii\db\Expression;
 
 /**
  * Class NoticeQuery
@@ -34,7 +33,7 @@ class NoticeQuery extends ElementQuery
 	public $cart;
 
 	/** @var bool */
-	public $filter = true;
+	public $filter = false;
 
 	// Setters
 	// =========================================================================

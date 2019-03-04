@@ -15,6 +15,7 @@ use craft\elements\Category;
 use craft\elements\db\ElementQueryInterface;
 use craft\helpers\ArrayHelper;
 use craft\helpers\Json;
+use craft\helpers\UrlHelper;
 use ether\cartnotices\CartNotices;
 use ether\cartnotices\elements\db\NoticeQuery;
 use ether\cartnotices\enums\Types;
@@ -160,9 +161,10 @@ class Notice extends Element
 
 	public function getCpEditUrl ()
 	{
-		$url = $this->id . '/' . \Craft::$app->getSites()->getSiteById($this->siteId)->handle;
+		$url = '/cart-notices/' . $this->id . '/';
+		$url .= \Craft::$app->getSites()->getSiteById($this->siteId)->handle;
 
-		return $url;
+		return UrlHelper::cpUrl($url);
 	}
 
 	protected static function defineActions (string $source = null): array

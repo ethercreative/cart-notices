@@ -23,7 +23,7 @@ class CraftVariableBehavior extends Behavior
 
 	public function notices ($criteria = null): NoticeQuery
 	{
-		$query = Notice::find();
+		$query = Notice::find()->filter(true);
 
 		if ($criteria)
 			\Craft::configure($query, $criteria);

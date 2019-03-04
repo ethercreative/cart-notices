@@ -142,8 +142,6 @@ class NoticeController extends Controller
 	}
 
 	/**
-	 * FIXME: Can't save after creation (multi-site content issue)
-	 *
 	 * @return \yii\web\Response|null
 	 * @throws NotFoundHttpException
 	 * @throws ServerErrorHttpException
