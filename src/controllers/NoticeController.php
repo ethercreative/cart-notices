@@ -98,16 +98,22 @@ class NoticeController extends Controller
 
 				if (!$variables['notice'])
 					throw new NotFoundHttpException('Notice not found');
-
-				$variables['title'] = $variables['notice']->title;
 			}
 			else
 			{
 				$variables['notice']         = new Notice();
 				$variables['notice']->siteId = $variables['site']->id;
-
-				$variables['title'] = CartNotices::t('Create a new notice');
 			}
+		}
+
+		// Title
+		if ($noticeId || $notice)
+		{
+			$variables['title'] = $variables['notice']->title;
+		}
+		else
+		{
+			$variables['title'] = CartNotices::t('Create a new notice');
 		}
 
 		// Type
