@@ -101,8 +101,8 @@ class NoticeQuery extends ElementQuery
 
 		$sql = <<<SQL
 [[cart-notices.type]] = :type1 AND 
-:total <= [[cart-notices.target]] AND
-:total >= [[cart-notices.threshold]]
+:total <= COALESCE([[cart-notices.target]], 99999999) AND
+:total >= COALESCE([[cart-notices.threshold]], 0)
 SQL;
 
 		$this->subQuery->orWhere(
