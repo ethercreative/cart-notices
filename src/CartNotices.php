@@ -8,15 +8,21 @@
 
 namespace ether\cartnotices;
 
+use Craft;
 use craft\base\Plugin;
+use craft\events\ConfigEvent;
 use craft\events\RegisterUrlRulesEvent;
 use craft\helpers\UrlHelper;
+use craft\models\FieldLayout;
 use craft\web\twig\variables\CraftVariable;
 use craft\web\UrlManager;
 use ether\cartnotices\elements\Notice;
 use ether\cartnotices\web\twig\CraftVariableBehavior;
+use yii\base\ErrorException;
 use yii\base\Event;
+use yii\base\Exception;
 use yii\base\Model;
+use yii\web\Response;
 
 /**
  * Class CartNotices
@@ -51,6 +57,11 @@ class CartNotices extends Plugin
 			UrlManager::EVENT_REGISTER_CP_URL_RULES,
 			[$this, 'onRegisterCpUrlRules']
 		);
+
+		Craft::$app->projectConfig
+			->onAdd('cartNotices', [$this, 'handleChangedCartNotices'])
+			->onUpdate('cartNotices', [$this, 'handleChangedCartNotices'])
+			->onRemove('cartNotices', [$this, 'handleRemovedCartNotices']);
 	}
 
 	public function getCpNavItem ()
@@ -74,24 +85,30 @@ class CartNotices extends Plugin
 	}
 
 	/**
-	 * @return mixed|\yii\web\Response
+	 * @return mixed|Response
 	 */
 	public function getSettingsResponse ()
 	{
 		$url = UrlHelper::cpUrl('cart-notices/settings');
 
-		return \Craft::$app->controller->redirect($url);
+		return Craft::$app->controller->redirect($url);
 	}
 
 	/**
 	 * @return bool
-	 * @throws \yii\base\Exception
+	 * @throws Exception
+	 * @throws ErrorException
 	 */
 	public function beforeSaveSettings (): bool
 	{
-		$fieldLayout       = \Craft::$app->getFields()->assembleLayoutFromPost();
+		$fieldLayout       = Craft::$app->getFields()->assembleLayoutFromPost();
 		$fieldLayout->type = Notice::class;
-		\Craft::$app->getFields()->saveLayout($fieldLayout);
+		Craft::$app->getFields()->saveLayout($fieldLayout);
+
+		Craft::$app->projectConfig->set(
+			'cartNotices',
+			$fieldLayout->getConfig()
+		);
 
 		return parent::beforeSaveSettings();
 	}
@@ -105,7 +122,7 @@ class CartNotices extends Plugin
 	 */
 	protected function beforeInstall (): bool
 	{
-		if (!\Craft::$app->getPlugins()->isPluginInstalled('commerce'))
+		if (!Craft::$app->getPlugins()->isPluginInstalled('commerce'))
 			throw new \Exception('Commerce is required for this plugin to be installed!');
 
 		return parent::beforeInstall();
@@ -135,12 +152,33 @@ class CartNotices extends Plugin
 		$event->rules['cart-notices/<type>'] = 'cart-notices/notice/index';
 	}
 
+	// Events: Project Config
+	// -------------------------------------------------------------------------
+
+	/**
+	 * @param ConfigEvent $event
+	 *
+	 * @throws Exception
+	 */
+	public function handleChangedCartNotices (ConfigEvent $event)
+	{
+		$fieldLayout = FieldLayout::createFromConfig($event->newValue);
+		$fieldLayout->type = Notice::class;
+		Craft::$app->getFields()->saveLayout($fieldLayout);
+	}
+
+	public function handleRemovedCartNotices (ConfigEvent $event)
+	{
+		$fieldLayout = Craft::$app->getFields()->getLayoutByType(Notice::class);
+		Craft::$app->getFields()->deleteLayout($fieldLayout);
+	}
+
 	// Helpers
 	// =========================================================================
 
 	public static function t ($message, $params = [])
 	{
-		return \Craft::t('cart-notices', $message, $params);
+		return Craft::t('cart-notices', $message, $params);
 	}
 
 }
