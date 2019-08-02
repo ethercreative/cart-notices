@@ -8,13 +8,18 @@
 
 namespace ether\cartnotices\elements\db;
 
+use Craft;
 use craft\commerce\elements\Order;
 use craft\commerce\elements\Variant;
 use craft\commerce\models\LineItem;
 use craft\commerce\Plugin as Commerce;
 use craft\elements\db\ElementQuery;
+use craft\errors\ElementNotFoundException;
 use craft\helpers\Db;
+use DateTime;
 use ether\cartnotices\enums\Types;
+use Throwable;
+use yii\base\Exception;
 
 /**
  * Class NoticeQuery
@@ -40,6 +45,16 @@ class NoticeQuery extends ElementQuery
 	// Setters
 	// =========================================================================
 
+	/**
+	 * What type of notice should we get? Must be the handle or an array of
+	 *  handles of the notice types
+	 *
+	 * @see ../../enums/Types.php
+	 *
+	 * @param string|string[] $value
+	 *
+	 * @return $this
+	 */
 	public function type ($value)
 	{
 		$this->type = $value;
@@ -47,6 +62,14 @@ class NoticeQuery extends ElementQuery
 		return $this;
 	}
 
+	/**
+	 * Should we filter the notices by the currently active cart (or the cart
+	 *  that was passed to `cart`)?
+	 *
+	 * @param bool $value
+	 *
+	 * @return $this
+	 */
 	public function filter (bool $value)
 	{
 		$this->filter = $value;
@@ -54,12 +77,19 @@ class NoticeQuery extends ElementQuery
 		return $this;
 	}
 
+	/**
+	 * Set the cart to filter against (will default to the currently active cart)
+	 *
+	 * @param int|Order $value
+	 *
+	 * @return $this
+	 */
 	public function cart ($value)
 	{
 		if ($value instanceof Order)
 			$this->cart = $value;
 		else
-			$this->cart = Order::find($value)->one();
+			$this->cart = Order::findOne($value);
 
 		return $this;
 	}
@@ -69,9 +99,9 @@ class NoticeQuery extends ElementQuery
 
 	/**
 	 * @return bool
-	 * @throws \Throwable
-	 * @throws \craft\errors\ElementNotFoundException
-	 * @throws \yii\base\Exception
+	 * @throws Throwable
+	 * @throws ElementNotFoundException
+	 * @throws Exception
 	 */
 	protected function beforePrepare (): bool
 	{
@@ -122,7 +152,7 @@ SQL;
 ([[cart-notices.days]] LIKE '%*%' OR [[cart-notices.days]] LIKE :day)
 SQL;
 
-		$now = (new \DateTime());
+		$now = (new DateTime());
 		$w = $now->format('w');
 		if ($w === '0') $w = 7;
 		$this->subQuery->orWhere(
@@ -137,7 +167,7 @@ SQL;
 		// Referer
 		// ---------------------------------------------------------------------
 
-		$referer = \Craft::$app->request->getReferrer();
+		$referer = Craft::$app->request->getReferrer();
 		$referer = preg_replace('#^https?://#', '', $referer);
 		$referer = rtrim($referer, '/');
 
