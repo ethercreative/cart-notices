@@ -24,7 +24,7 @@ notices support some additional ones:
 ### `type`
 
 Specify the type of notice you want to show. Can be a string or an array of 
-strings. Must match the handles of the [notice types](./src/enums/Types.php).
+strings. Must match the handles of the [notice types](https://github.com/ethercreative/cart-notices/blob/master/src/enums/Types.php#L25-L29).
 
 ```twig
 {% set notices = craft.notices.type(['deadline', 'referer']).all() %}
