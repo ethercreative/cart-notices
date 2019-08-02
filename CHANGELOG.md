@@ -1,3 +1,7 @@
+## 1.0.2 - 2019-08-02
+### Fixed
+- Fix CP edit url not linking to the admin
+
 ## 1.0.1 - 2019-04-24
 ### Fixed
 - Fixed project config not syncing field layout

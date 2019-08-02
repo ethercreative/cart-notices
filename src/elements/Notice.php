@@ -8,6 +8,7 @@
 
 namespace ether\cartnotices\elements;
 
+use Craft;
 use craft\base\Element;
 use craft\commerce\elements\Product;
 use craft\elements\actions\Restore;
@@ -136,9 +137,9 @@ class Notice extends Element
 
 	public function getEditorHtml (): string
 	{
-		$html = \Craft::$app->getView()->renderTemplateMacro('_includes/forms', 'textField', [
+		$html = Craft::$app->getView()->renderTemplateMacro('_includes/forms', 'textField', [
 			[
-				'label'     => \Craft::t('app', 'Title'),
+				'label'     => Craft::t('app', 'Title'),
 				'siteId'    => $this->siteId,
 				'id'        => 'title',
 				'name'      => 'title',
@@ -159,13 +160,13 @@ class Notice extends Element
 
 	public function getFieldLayout ()
 	{
-		return \Craft::$app->getFields()->getLayoutByType(Notice::class);
+		return Craft::$app->getFields()->getLayoutByType(Notice::class);
 	}
 
 	public function getCpEditUrl ()
 	{
-		$url = '/cart-notices/' . $this->id . '/';
-		$url .= \Craft::$app->getSites()->getSiteById($this->siteId)->handle;
+		$url = 'cart-notices/' . $this->id . '/';
+		$url .= Craft::$app->getSites()->getSiteById($this->siteId)->handle;
 
 		return UrlHelper::cpUrl($url);
 	}
@@ -180,7 +181,7 @@ class Notice extends Element
 	protected static function defineTableAttributes (): array
 	{
 		return [
-			'title'       => \Craft::t('app', 'Title'),
+			'title'       => Craft::t('app', 'Title'),
 			'type'        => CartNotices::t('Type'),
 			'target'      => CartNotices::t('Target'),
 			'threshold'   => CartNotices::t('Threshold'),
@@ -191,8 +192,8 @@ class Notice extends Element
 			'maxQty'      => CartNotices::t('Max Qty'),
 			'products'    => CartNotices::t('Products'),
 			'categories'  => CartNotices::t('Categories'),
-			'dateCreated' => \Craft::t('app', 'Date Created'),
-			'dateUpdated' => \Craft::t('app', 'Date Updated'),
+			'dateCreated' => Craft::t('app', 'Date Created'),
+			'dateUpdated' => Craft::t('app', 'Date Updated'),
 		];
 	}
 
@@ -326,7 +327,7 @@ class Notice extends Element
 	 */
 	public function afterSave (bool $isNew)
 	{
-		$db = \Craft::$app->getDb();
+		$db = Craft::$app->getDb();
 
 		$transaction = $db->beginTransaction();
 
@@ -402,7 +403,7 @@ class Notice extends Element
 	 */
 	private function _saveRelations ($target, $ids)
 	{
-		$db = \Craft::$app->getDb();
+		$db = Craft::$app->getDb();
 		$table = '{{%cart-notices_notice_' . $target . '}}';
 
 		$db->createCommand()
