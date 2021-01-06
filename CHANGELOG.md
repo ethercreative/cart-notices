@@ -1,3 +1,7 @@
+## 1.0.3 - 2021-01-06
+### Fixed
+- Fix issues when cart is empty or not saved
+
 ## 1.0.2 - 2019-08-02
 ### Fixed
 - Fix CP edit url not linking to the admin

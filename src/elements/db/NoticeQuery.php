@@ -196,6 +196,11 @@ SQL;
 			$this->_lineItemProductIds($cart->lineItems)
 		);
 
+		if (empty($productIds))
+			$productIds = -1;
+
+		$cartId = $cart->id ?? -1;
+
 		$sql = <<<SQL
 [[cart-notices.type]] = :type4 AND 
 [[cart-notices.id]] IN (
@@ -203,7 +208,7 @@ SQL;
 	FROM {{%cart-notices_notice_product}} [[np]]
 	INNER JOIN {{%cart-notices}} [[cn]] ON [[cn.id]] = [[np.noticeId]]
 	INNER JOIN {{%commerce_variants}} [[cv]] ON [[np.productId]] = [[cv.productId]]
-	INNER JOIN {{%commerce_lineitems}} [[li]] ON [[li.purchasableId]] = [[cv.id]] AND [[li.orderId]] = '$cart->id'
+	INNER JOIN {{%commerce_lineitems}} [[li]] ON [[li.purchasableId]] = [[cv.id]] AND [[li.orderId]] = '$cartId'
 	WHERE [[np.productId]] IN ('$productIds')
 	AND ([[li.qty]] BETWEEN COALESCE([[cn.minQty]], 0) AND COALESCE([[cn.maxQty]], 99999999))
 )
@@ -224,6 +229,9 @@ SQL;
 			'\',\'',
 			$this->_lineItemPurchasableIds($cart->lineItems)
 		);
+
+		if (empty($purchasableIds))
+			$purchasableIds = -2;
 
 		$sql = <<<SQL
 [[cart-notices.type]] = :type5 AND
