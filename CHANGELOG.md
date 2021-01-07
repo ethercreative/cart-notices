@@ -1,3 +1,7 @@
+## 1.0.4 - 2021-01-07
+### Added
+- Add exclude tax & shipping options to min amount notice
+
 ## 1.0.3 - 2021-01-06
 ### Fixed
 - Fix issues when cart is empty or not saved

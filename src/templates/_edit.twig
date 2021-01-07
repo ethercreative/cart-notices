@@ -148,6 +148,54 @@
 
 		{% embed '_includes/forms/field' with {
 			notice: notice,
+			errors: notice.getErrors('excludeTax'),
+		} only %}
+			{% import '_includes/forms' as forms %}
+			{% block attr %}
+				v-bind:style="show('minimum-amount')"
+			{% endblock %}
+			{% set label %}
+				{{ 'Exclude Tax'|t('cart-notices') }}
+				<div class="info">
+					{{ 'Tax will be excluded when checking the cart total'|t('cart-notices') }}
+				</div>
+			{% endset %}
+			{% set input %}
+				{{ forms.lightswitch({
+					name: 'excludeTax',
+					id: 'excludeTax',
+					on: notice.excludeTax,
+					value: 1,
+				}) }}
+			{% endset %}
+		{% endembed %}
+
+		{% embed '_includes/forms/field' with {
+			notice: notice,
+			errors: notice.getErrors('excludeShipping'),
+		} only %}
+			{% import '_includes/forms' as forms %}
+			{% block attr %}
+				v-bind:style="show('minimum-amount')"
+			{% endblock %}
+			{% set label %}
+				{{ 'Exclude Shipping'|t('cart-notices') }}
+				<div class="info">
+					{{ 'Shipping will be excluded when checking the cart total'|t('cart-notices') }}
+				</div>
+			{% endset %}
+			{% set input %}
+				{{ forms.lightswitch({
+					name: 'excludeShipping',
+					id: 'excludeShipping',
+					on: notice.excludeShipping,
+					value: 1,
+				}) }}
+			{% endset %}
+		{% endembed %}
+
+		{% embed '_includes/forms/field' with {
+			notice: notice,
 			errors: notice.getErrors('target'),
 		} only %}
 			{% import '_includes/forms' as forms %}

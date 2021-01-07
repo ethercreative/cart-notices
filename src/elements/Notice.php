@@ -43,6 +43,12 @@ class Notice extends Element
 	/** @var float - Minimum amount: total must be >= this */
 	public $threshold;
 
+	/** @var bool - Minimum amount: exclude tax from total */
+	public $excludeTax = false;
+
+	/** @var bool - Minimum amount: exclude shipping from total */
+	public $excludeShipping = false;
+
 	/** @var int - Deadline: deadline hour, can be 1 - 24 */
 	public $hour;
 
@@ -181,19 +187,21 @@ class Notice extends Element
 	protected static function defineTableAttributes (): array
 	{
 		return [
-			'title'       => Craft::t('app', 'Title'),
-			'type'        => CartNotices::t('Type'),
-			'target'      => CartNotices::t('Target'),
-			'threshold'   => CartNotices::t('Threshold'),
-			'hour'        => CartNotices::t('Hour'),
-			'days'        => CartNotices::t('Days'),
-			'referer'     => CartNotices::t('Referer'),
-			'minQty'      => CartNotices::t('Min Qty'),
-			'maxQty'      => CartNotices::t('Max Qty'),
-			'products'    => CartNotices::t('Products'),
-			'categories'  => CartNotices::t('Categories'),
-			'dateCreated' => Craft::t('app', 'Date Created'),
-			'dateUpdated' => Craft::t('app', 'Date Updated'),
+			'title'           => Craft::t('app', 'Title'),
+			'type'            => CartNotices::t('Type'),
+			'target'          => CartNotices::t('Target'),
+			'threshold'       => CartNotices::t('Threshold'),
+			'excludeTax'      => CartNotices::t('Exclude Tax'),
+			'excludeShipping' => CartNotices::t('Exclude Shipping'),
+			'hour'            => CartNotices::t('Hour'),
+			'days'            => CartNotices::t('Days'),
+			'referer'         => CartNotices::t('Referer'),
+			'minQty'          => CartNotices::t('Min Qty'),
+			'maxQty'          => CartNotices::t('Max Qty'),
+			'products'        => CartNotices::t('Products'),
+			'categories'      => CartNotices::t('Categories'),
+			'dateCreated'     => Craft::t('app', 'Date Created'),
+			'dateUpdated'     => Craft::t('app', 'Date Updated'),
 		];
 	}
 
@@ -206,6 +214,8 @@ class Notice extends Element
 			case Types::MinimumAmount:
 				$attrs[] = 'target';
 				$attrs[] = 'threshold';
+				$attrs[] = 'excludeTax';
+				$attrs[] = 'excludeShipping';
 				break;
 			case Types::Deadline:
 				$attrs[] = 'hour';
@@ -337,17 +347,19 @@ class Notice extends Element
 			{
 				$db->createCommand()
 				   ->insert('{{%cart-notices}}', [
-					   'id'        => $this->id,
-					   'siteId'    => $this->siteId,
-					   'enabled'   => $this->enabled,
-					   'type'      => $this->type,
-					   'target'    => $this->target,
-					   'threshold' => $this->threshold,
-					   'hour'      => $this->hour,
-					   'days'      => Json::encode($this->days),
-					   'referer'   => $this->referer,
-					   'minQty'    => $this->minQty,
-					   'maxQty'    => $this->maxQty,
+					   'id'              => $this->id,
+					   'siteId'          => $this->siteId,
+					   'enabled'         => $this->enabled,
+					   'type'            => $this->type,
+					   'target'          => $this->target,
+					   'threshold'       => $this->threshold,
+					   'excludeTax'      => $this->excludeTax,
+					   'excludeShipping' => $this->excludeShipping,
+					   'hour'            => $this->hour,
+					   'days'            => Json::encode($this->days),
+					   'referer'         => $this->referer,
+					   'minQty'          => $this->minQty,
+					   'maxQty'          => $this->maxQty,
 				   ])
 				   ->execute();
 			}
@@ -355,15 +367,17 @@ class Notice extends Element
 			{
 				$db->createCommand()
 				   ->update('{{%cart-notices}}', [
-					   'enabled'   => $this->enabled,
-					   'type'      => $this->type,
-					   'target'    => $this->target,
-					   'threshold' => $this->threshold,
-					   'hour'      => $this->hour,
-					   'days'      => Json::encode($this->days),
-					   'referer'   => $this->referer,
-					   'minQty'    => $this->minQty,
-					   'maxQty'    => $this->maxQty,
+					   'enabled'         => $this->enabled,
+					   'type'            => $this->type,
+					   'target'          => $this->target,
+					   'threshold'       => $this->threshold,
+					   'excludeTax'      => $this->excludeTax,
+					   'excludeShipping' => $this->excludeShipping,
+					   'hour'            => $this->hour,
+					   'days'            => Json::encode($this->days),
+					   'referer'         => $this->referer,
+					   'minQty'          => $this->minQty,
+					   'maxQty'          => $this->maxQty,
 				   ], [
 					   'id'     => $this->id,
 					   'siteId' => $this->siteId,

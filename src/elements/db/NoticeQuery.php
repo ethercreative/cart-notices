@@ -129,17 +129,30 @@ class NoticeQuery extends ElementQuery
 		// Minimum Amount
 		// ---------------------------------------------------------------------
 
-		$sql = <<<SQL
+		if (Craft::$app->getDb()->getIsMysql())
+		{
+			$sql = <<<SQL
 [[cart-notices.type]] = :type1 AND 
-:total <= COALESCE([[cart-notices.target]], 99999999) AND
-:total >= COALESCE([[cart-notices.threshold]], 0)
+:total - (IF([[cart-notices.excludeTax]], :tax, 0) + IF([[cart-notices.excludeShipping]], :shipping, 0)) <= COALESCE([[cart-notices.target]], 99999999) AND
+:total - (IF([[cart-notices.excludeTax]], :tax, 0) + IF([[cart-notices.excludeShipping]], :shipping, 0)) >= COALESCE([[cart-notices.threshold]], 0)
 SQL;
+		}
+		else
+		{
+			$sql = <<<SQL
+[[cart-notices.type]] = :type1 AND 
+:total - ((case when [[cart-notices.excludeTax]] then :tax else 0 end) + (case when [[cart-notices.excludeShipping]] then :shipping else 0 end)) <= COALESCE([[cart-notices.target]], 99999999) AND
+:total - ((case when [[cart-notices.excludeTax]] then :tax else 0 end) + (case when [[cart-notices.excludeShipping]] then :shipping else 0 end)) >= COALESCE([[cart-notices.threshold]], 0)
+SQL;
+		}
 
 		$this->subQuery->orWhere(
 			$sql,
 			[
-				'type1' => Types::MinimumAmount,
-				'total' => $cart->totalPrice
+				'type1'    => Types::MinimumAmount,
+				'total'    => $cart->getTotalPrice(),
+				'tax'      => $cart->getTotalTax(),
+				'shipping' => $cart->getTotalShippingCost(),
 			]
 		);
 

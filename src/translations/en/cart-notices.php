@@ -29,6 +29,14 @@ return [
 	'Cart total must be greater than or equal to this amount' =>
 		'Cart total must be greater than or equal to this amount',
 
+	'Exclude Tax' => 'Exclude Tax',
+	'Tax will be excluded when checking the cart total' =>
+		'Tax will be excluded when checking the cart total',
+
+	'Exclude Shipping' => 'Exclude Shipping',
+	'Shipping will be excluded when checking the cart total' =>
+		'Shipping will be excluded when checking the cart total',
+
 	'Hour' => 'Hour',
 	'Deadline hour, can be 1 - 24' => 'Deadline hour, can be 1 - 24',
 

@@ -227,17 +227,19 @@ class NoticeController extends Controller
 			$request->getParam('fieldsLocation', 'fields')
 		);
 
-		$notice->enabled     = $request->getParam('enabled');
-		$notice->type        = $request->getParam('type');
-		$notice->target      = $request->getParam('target');
-		$notice->threshold   = $request->getParam('threshold');
-		$notice->hour        = $request->getParam('hour');
-		$notice->days        = $request->getParam('days');
-		$notice->referer     = $request->getParam('referer');
-		$notice->minQty      = $request->getParam('minQty');
-		$notice->maxQty      = $request->getParam('maxQty');
-		$notice->productIds  = $request->getParam('products', []);
-		$notice->categoryIds = $request->getParam('categories', []);
+		$notice->enabled         = $request->getParam('enabled');
+		$notice->type            = $request->getParam('type');
+		$notice->target          = $request->getParam('target');
+		$notice->threshold       = $request->getParam('threshold');
+		$notice->excludeTax      = $request->getParam('excludeTax');
+		$notice->excludeShipping = $request->getParam('excludeShipping');
+		$notice->hour            = $request->getParam('hour');
+		$notice->days            = $request->getParam('days');
+		$notice->referer         = $request->getParam('referer');
+		$notice->minQty          = $request->getParam('minQty');
+		$notice->maxQty          = $request->getParam('maxQty');
+		$notice->productIds      = $request->getParam('products', []);
+		$notice->categoryIds     = $request->getParam('categories', []);
 
 		if ($notice->enabled === '') $notice->enabled = false;
 		if (!is_array($notice->productIds)) $notice->productIds = [];

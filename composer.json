@@ -1,7 +1,7 @@
 {
   "name": "ether/cart-notices",
   "description": "Automatically show notices based off cart details",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "type": "craft-plugin",
   "license": "proprietary",
   "minimum-stability": "dev",
@@ -25,6 +25,6 @@
     "developer": "Ether",
     "developerUrl": "https://ethercreative.co.uk",
     "class": "ether\\cartnotices\\CartNotices",
-    "schemaVersion": "1.0.0"
+    "schemaVersion": "1.0.1"
   }
 }
